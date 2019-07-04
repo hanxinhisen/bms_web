@@ -1,6 +1,14 @@
 <template>
 
     <div>
+        <el-row>
+            <el-col :span="3" class="grid">
+                <el-input v-model="search_input" placeholder="请输入ID" size="mini" clearable type="number"></el-input>
+            </el-col>
+            <el-col :span="1" class="grid">
+                <el-button type="success" icon="el-icon-search" size="mini" @click.prevent="search()"></el-button>
+            </el-col>
+        </el-row>
         <el-table element-loading-text="拼命加载中"
                   element-loading-spinner="el-icon-loading"
                   element-loading-background="rgba(0, 0, 0, 0.8)"
@@ -8,10 +16,11 @@
                   :data="list" border style="width: 100%" ref="multipleTable" tooltip-effect="dark" height="500">
             <el-table-column prop="id" label="id" sortable=""></el-table-column>
             <el-table-column prop="name" label="书名"></el-table-column>
-            <el-table-column prop="author" label="作者"  sortable></el-table-column>
-            <el-table-column prop="price" label="价格" :filters="pricelist"  :filter-method="filterHandler" sortable=""></el-table-column>
+            <el-table-column prop="author" label="作者" sortable></el-table-column>
+            <el-table-column prop="price" label="价格" :filters="pricelist" :filter-method="filterHandler"
+                             sortable=""></el-table-column>
             <el-table-column prop="publish_date" label="发布时间" :formatter="dateFormat" sortable
-                             :filters="datelist"  :filter-method="filterHandler"></el-table-column>
+                             :filters="datelist" :filter-method="filterHandler"></el-table-column>
 
             <el-table-column label="编辑">
                 <template slot-scope="scope">
@@ -42,15 +51,15 @@
         },
         data() {
             return {
-                input: 0,
+                search_input: 0,
                 list: [],
-                datelist :[],
-                pricelist:[],
+                datelist: [],
+                pricelist: [],
             };
 
         },
         methods: {
-            filterHandler(value, row, column){
+            filterHandler(value, row, column) {
                 const property = column['property'];
                 return row[property] === value;
             },
@@ -60,9 +69,9 @@
                 }
                 return this.$moment(date).format("YYYY-MM-DD HH:mm:ss");
             },
-            isINArray(arr,value){
-                for(let i = 0; i < arr.length; i++){
-                    if(JSON.stringify(value) === JSON.stringify(arr[i])){
+            isINArray(arr, value) {
+                for (let i = 0; i < arr.length; i++) {
+                    if (JSON.stringify(value) === JSON.stringify(arr[i])) {
                         return true;
                     }
                 }
@@ -78,12 +87,12 @@
                     if (result.code === 200) {
                         self.list = result.data
                         result.data.forEach(function (v) {
-                            let t = {text:self.dateFormatDate(v.publish_date),value:v.publish_date};
-                            if (!self.isINArray(datalist,t)){
+                            let t = {text: self.dateFormatDate(v.publish_date), value: v.publish_date};
+                            if (!self.isINArray(datalist, t)) {
                                 datalist.push(t)
                             }
-                            let p  = {text:v.price,value:v.price}
-                            if (!self.isINArray(pricelist,p)){
+                            let p = {text: v.price, value: v.price}
+                            if (!self.isINArray(pricelist, p)) {
                                 pricelist.push(p)
                             }
 
@@ -116,6 +125,21 @@
                             type: 'success'
                         });
                         this.reload()
+                    }
+                })
+            },
+            search(){
+                var url = ""
+                if (this.search_input.length === 0){
+                    url = "book"
+                } else{
+                    url = "book/" + this.search_input
+                }
+
+                this.$http.get(url).then(result =>{
+                    var result = result.body
+                    if (result.code === 200){
+                        this.list = result.data
                     }
                 })
             }
